@@ -25,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json([
                     'success' => false,
                     'status' => 401,
+                    'code' => 'UNAUTHORIZED',
                     'message' => 'Unauthorized.',
                 ], 401);
             }

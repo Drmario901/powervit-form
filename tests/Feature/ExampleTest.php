@@ -1,7 +1,12 @@
 <?php
 
-test('la página principal responde Unauthorized', function () {
-    $response = $this->get('/');
-
-    $response->assertStatus(401)->assertSee('Unauthorized', false);
+test('la página principal responde JSON Unauthorized con código', function () {
+    $this->getJson('/')
+        ->assertStatus(401)
+        ->assertExactJson([
+            'success' => false,
+            'status' => 401,
+            'code' => 'UNAUTHORIZED',
+            'message' => 'Unauthorized.',
+        ]);
 });

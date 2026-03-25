@@ -5,13 +5,7 @@ use App\Services\ResendContactMailer;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Facades\Http;
 
-it('la raíz web muestra Unauthorized en HTML', function () {
-    $this->get('/')
-        ->assertStatus(401)
-        ->assertSee('Unauthorized', false);
-});
-
-it('GET /api devuelve JSON Unauthorized', function () {
+it('GET /api devuelve JSON Unauthorized con código', function () {
     config(['api.access_token' => '']);
 
     $this->getJson('/api')
@@ -19,6 +13,7 @@ it('GET /api devuelve JSON Unauthorized', function () {
         ->assertExactJson([
             'success' => false,
             'status' => 401,
+            'code' => 'UNAUTHORIZED',
             'message' => 'Unauthorized.',
         ]);
 });
@@ -31,6 +26,7 @@ it('responde Unauthorized sin X-Api-Key cuando API_ACCESS_TOKEN está definido',
         ->assertExactJson([
             'success' => false,
             'status' => 401,
+            'code' => 'UNAUTHORIZED',
             'message' => 'Unauthorized.',
         ]);
 });
@@ -88,6 +84,7 @@ it('unifica Sanctum a JSON Unauthorized en rutas api', function () {
         ->assertJson([
             'success' => false,
             'status' => 401,
+            'code' => 'UNAUTHORIZED',
             'message' => 'Unauthorized.',
         ]);
 });
