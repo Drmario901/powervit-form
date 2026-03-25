@@ -1,5 +1,28 @@
 <?php
 
+use App\Services\ContactEmailRenderer;
+use App\Services\ResendContactMailer;
+use Illuminate\Routing\Middleware\ThrottleRequests;
+use Illuminate\Support\Facades\Http;
+
+it('la raíz web muestra Unauthorized en HTML', function () {
+    $this->get('/')
+        ->assertStatus(401)
+        ->assertSee('Unauthorized', false);
+});
+
+it('GET /api devuelve JSON Unauthorized', function () {
+    config(['api.access_token' => '']);
+
+    $this->getJson('/api')
+        ->assertStatus(401)
+        ->assertExactJson([
+            'success' => false,
+            'status' => 401,
+            'message' => 'Unauthorized.',
+        ]);
+});
+
 it('responde Unauthorized sin X-Api-Key cuando API_ACCESS_TOKEN está definido', function () {
     config(['api.access_token' => 'clave-secreta-de-prueba']);
 
@@ -27,16 +50,16 @@ it('permite la petición con X-Api-Key válido', function () {
 it('no exige X-Api-Key para POST /api/contact aunque exista token', function () {
     config(['api.access_token' => 'clave-secreta-de-prueba']);
 
-    \Illuminate\Support\Facades\Http::fake([
-        'https://challenges.cloudflare.com/turnstile/v0/siteverify' => \Illuminate\Support\Facades\Http::response(['success' => true], 200),
+    Http::fake([
+        'https://challenges.cloudflare.com/turnstile/v0/siteverify' => Http::response(['success' => true], 200),
     ]);
 
-    $this->mock(\App\Services\ContactEmailRenderer::class)
+    $this->mock(ContactEmailRenderer::class)
         ->shouldReceive('render')
         ->once()
         ->andReturn('<html/>');
 
-    $this->mock(\App\Services\ResendContactMailer::class)
+    $this->mock(ResendContactMailer::class)
         ->shouldReceive('send')
         ->once();
 
@@ -47,7 +70,7 @@ it('no exige X-Api-Key para POST /api/contact aunque exista token', function () 
         'contact.mail.from' => 'no-reply@powervit.fit',
     ]);
 
-    $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class);
+    $this->withoutMiddleware(ThrottleRequests::class);
 
     $this->postJson('/api/contact', [
         'name' => 'Ana',

@@ -1,7 +1,7 @@
 <?php
 
-test('the application returns a successful response', function () {
+test('la página principal responde Unauthorized', function () {
     $response = $this->get('/');
 
-    $response->assertStatus(200);
+    $response->assertStatus(401)->assertSee('Unauthorized', false);
 });
